@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Geospasial Mitigasi Longsor Tana Toraja — RISIL TIA MANGAPE</title>
+<style>
+:root{--navy:#0F172A;--blue:#2563EB;--teal:#0D9488;--yellow:#D97706;--red:#DC2626;--bg:#F8FAFC;--card:#FFFFFF;--ink:#1E293B;--muted:#64748B;--line:#E2E8F0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif}
+header{background:linear-gradient(135deg,#0F172A,#1E3A8A,#1D4ED8);color:white;padding:24px clamp(16px,4vw,48px);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.header-title h1{margin:0;font-size:clamp(20px,2.5vw,28px);font-weight:800;letter-spacing:-0.02em}
+.header-title p{margin:6px 0 0;color:#93C5FD;font-size:13px}
+.user-badge{background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);padding:10px 16px;border-radius:12px;text-align:right}
+.user-name{font-weight:800;font-size:14px;color:#FFFFFF;display:block}
+.user-nim{font-size:12px;color:#60A5FA;font-family:monospace;font-weight:700}
+
+main{max-width:1440px;margin:auto;padding:22px clamp(12px,3vw,32px) 40px}
+.toolbar,.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 12px #0f172a08}
+.toolbar{padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+label{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:12px;font-weight:700}
+select,input,button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:9px 12px;background:white;color:var(--ink)}
+select{min-width:140px;cursor:pointer}button{cursor:pointer;font-weight:700;transition:all 0.2s}
+button:hover{opacity:0.9}.primary{background:var(--blue);border-color:var(--blue);color:white}
+.btn-print{background:#E2E8F0;border-color:#CBD5E1;color:var(--ink)}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:16px 0}
+.kpi{padding:16px;border-top:4px solid var(--blue)}.kpi:nth-child(2n){border-top-color:var(--yellow)}.kpi:nth-child(3n){border-top-color:var(--red)}.kpi:nth-child(4n){border-top-color:var(--teal)}
+.label{color:var(--muted);font-size:12px;font-weight:700}.value{font-size:26px;font-weight:800;margin-top:4px;letter-spacing:-0.03em}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px;margin-bottom:16px}
+.card{padding:18px;min-width:0}.card h2{font-size:16px;margin:0 0 2px;font-weight:700}.sub{color:var(--muted);font-size:12px;margin:0 0 12px}
+.chart{width:100%;height:270px;display:block}.map-container{position:relative;width:100%}
+.map{width:100%;height:320px;display:block;background:#F1F5F9;border:1px solid var(--line);border-radius:10px;cursor:crosshair}
+.map-tooltip{position:absolute;display:none;background:rgba(15,23,42,0.9);color:white;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+
+.notice{background:#FEF3C7;border-left:4px solid var(--yellow);padding:12px 14px;border-radius:8px;margin:14px 0;font-size:13px;color:#92400E}
+.tablewrap{overflow:auto;max-height:420px;margin-top:12px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--navy);color:white;font-weight:700;z-index:1}
+tr:hover{background:#F8FAFC}
+.badge{padding:3px 9px;border-radius:12px;font-weight:700;font-size:11px;display:inline-block}
+.badge-tinggi{background:#FEE2E2;color:#991B1B}.badge-sedang{background:#FEF3C7;color:#92400E}.badge-rendah{background:#D1FAE5;color:#065F46}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+footer{color:var(--muted);font-size:12px;padding:16px 2px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+@media(max-width:600px){.chart{height:230px}.card{padding:14px}}
+@media print{.noprint{display:none!important}body{background:white}header{background:var(--navy)!important;color:white!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>Dashboard Geospasial Mitigasi Longsor Tana Toraja</h1>
+    <p>Sistem Informasi Pemetaan Tata Guna Lahan & Kerentanan Lereng Pegunungan</p>
+  </div>
+  <div class="user-badge">
+    <span class="user-name">RISIL TIA MANGAPE</span>
+    <span class="user-nim">NIM: H061241075</span>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar noprint" id="filters"></div>
+  
+  <div class="notice">
+    <b>Informasi Data Geospasial:</b> Terdata 30 sampel lokasi petak lahan riil di Kabupaten Tana Toraja lengkap dengan koordinat spasial nyata (Latitude & Longitude), elevasi (mdpl), dan persentase kemiringan lereng.
+  </div>
+  
+  <section class="kpis" id="kpis"></section>
+  
+  <section class="grid">
+    <div class="card"><h2>Luas Berdasarkan Penggunaan Lahan</h2><p class="sub">Akumulasi total luas lahan (ha)</p><canvas id="c1" class="chart"></canvas></div>
+    <div class="card"><h2>Proporsi Tingkat Risiko Longsor</h2><p class="sub">Persentase luas area rawan</p><canvas id="c2" class="chart"></canvas></div>
+    <div class="card"><h2>Sebaran Luas Lahan per Kecamatan</h2><p class="sub">Total luas wilayah terdata (ha)</p><canvas id="c3" class="chart"></canvas></div>
+    <div class="card"><h2>Jumlah Petak per Kategori Lereng</h2><p class="sub">Klasifikasi kecuraman (%)</p><canvas id="c4" class="chart"></canvas></div>
+  </section>
+
+  <section class="card">
+    <h2>Peta Interaktif Spasial Petak Lahan Tana Toraja</h2>
+    <p class="sub">Arahkan kursor (*hover*) pada titik lokasi untuk melihat rincian informasi spasial.</p>
+    <div class="map-container">
+      <canvas id="map" class="map"></canvas>
+      <div id="mapTooltip" class="map-tooltip"></div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#DC2626"></i>Risiko Tinggi</span>
+      <span><i class="dot" style="background:#D97706"></i>Risiko Sedang</span>
+      <span><i class="dot" style="background:#0D9488"></i>Risiko Rendah</span>
+    </div>
+    <p id="mapStatus" class="sub" style="margin-top:8px"></p>
+    
+    <div class="noprint" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
+      <label style="cursor:pointer">Impor File CSV <input type="file" id="csv" accept=".csv" style="display:none"></label>
+      <button class="primary" id="download">Unduh Data CSV</button>
+      <button class="btn-print" onclick="window.print()">Cetak / Simpan PDF</button>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Tabel Data Pemetaan Lahan & Kerentanan <span id="count"></span></h2>
+    <div class="tablewrap"><table id="table"></table></div>
+  </section>
+  
+  <footer>
+    <span>Dashboard Tugas AI & Geospasial — RISIL TIA MANGAPE (H061241075)</span>
+    <span>Dikembangkan dengan HTML5, Canvas 2D & Chart.js</span>
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const source = [
+  {"id": "TRJ-001", "kec": "Makale", "desa": "Bombongan", "use": "Permukiman", "risk": "Tinggi", "soil": "Latosol", "luas": 4.5, "kem": 28.5, "elev": 750, "latitude": -3.0972, "longitude": 119.8631},
+  {"id": "TRJ-002", "kec": "Makale", "desa": "Manggau", "use": "Sawah", "risk": "Sedang", "soil": "Aluvial", "luas": 8.2, "kem": 12.0, "elev": 710, "latitude": -3.1120, "longitude": 119.8750},
+  {"id": "TRJ-003", "kec": "Bittuang", "desa": "Burasia", "use": "Hutan", "risk": "Tinggi", "soil": "Podsolik", "luas": 14.8, "kem": 35.2, "elev": 1420, "latitude": -3.0150, "longitude": 119.6820},
+  {"id": "TRJ-004", "kec": "Bittuang", "desa": "Kandua", "use": "Kebun Kopi", "risk": "Tinggi", "soil": "Andosol", "luas": 9.5, "kem": 31.0, "elev": 1350, "latitude": -3.0280, "longitude": 119.6950},
+  {"id": "TRJ-005", "kec": "Mengkendek", "desa": "Rante Kalua", "use": "Kebun Kopi", "risk": "Sedang", "soil": "Latosol", "luas": 6.7, "kem": 18.4, "elev": 820, "latitude": -3.1850, "longitude": 119.8920},
+  {"id": "TRJ-006", "kec": "Mengkendek", "desa": "Uluway", "use": "Hutan", "risk": "Tinggi", "soil": "Podsolik", "luas": 12.1, "kem": 33.5, "elev": 1100, "latitude": -3.2100, "longitude": 119.9200},
+  {"id": "TRJ-007", "kec": "Saluputi", "desa": "Ratte Talonge", "use": "Sawah", "risk": "Rendah", "soil": "Aluvial", "luas": 5.4, "kem": 7.5, "elev": 780, "latitude": -3.0780, "longitude": 119.7900},
+  {"id": "TRJ-008", "kec": "Rembon", "desa": "Palesan", "use": "Hutan", "risk": "Tinggi", "soil": "Andosol", "luas": 11.3, "kem": 29.0, "elev": 1050, "latitude": -3.1200, "longitude": 119.7600},
+  {"id": "TRJ-009", "kec": "Rembon", "desa": "Sarapeang", "use": "Kebun Kopi", "risk": "Sedang", "soil": "Latosol", "luas": 7.8, "kem": 21.3, "elev": 980, "latitude": -3.1350, "longitude": 119.7450},
+  {"id": "TRJ-010", "kec": "Gandangbatu Sillanan", "desa": "Mebali", "use": "Permukiman", "risk": "Sedang", "soil": "Regosol", "luas": 3.9, "kem": 16.8, "elev": 890, "latitude": -3.2250, "longitude": 119.8600},
+  {"id": "TRJ-011", "kec": "Gandangbatu Sillanan", "desa": "Kaduaja", "use": "Hutan", "risk": "Tinggi", "soil": "Podsolik", "luas": 15.2, "kem": 38.0, "elev": 1280, "latitude": -3.2500, "longitude": 119.8300},
+  {"id": "TRJ-012", "kec": "Sangalla", "desa": "Kaero", "use": "Sawah", "risk": "Rendah", "soil": "Aluvial", "luas": 6.1, "kem": 5.2, "elev": 720, "latitude": -3.1050, "longitude": 119.9300},
+  {"id": "TRJ-013", "kec": "Sangalla Selatan", "desa": "Raru Sibunuan", "use": "Kebun Kopi", "risk": "Sedang", "soil": "Latosol", "luas": 8.0, "kem": 19.5, "elev": 810, "latitude": -3.1400, "longitude": 119.9500},
+  {"id": "TRJ-014", "kec": "Rano", "desa": "Rumandan", "use": "Hutan", "risk": "Tinggi", "soil": "Podsolik", "luas": 10.4, "kem": 34.0, "elev": 950, "latitude": -3.2400, "longitude": 119.7700},
+  {"id": "TRJ-015", "kec": "Bonggakaradeng", "desa": "Buakayu", "use": "Lahan Kosong", "risk": "Tinggi", "soil": "Regosol", "luas": 9.1, "kem": 36.5, "elev": 870, "latitude": -3.1800, "longitude": 119.6600},
+  {"id": "TRJ-016", "kec": "Makale Selatan", "desa": "Tosapan", "use": "Kebun Kopi", "risk": "Sedang", "soil": "Latosol", "luas": 5.9, "kem": 22.0, "elev": 910, "latitude": -3.1500, "longitude": 119.8700},
+  {"id": "TRJ-017", "kec": "Makale Selatan", "desa": "Randan Batu", "use": "Hutan", "risk": "Tinggi", "soil": "Podsolik", "luas": 13.0, "kem": 32.4, "elev": 1150, "latitude": -3.1650, "longitude": 119.8850},
+  {"id": "TRJ-018", "kec": "Simbuang", "desa": "Makkodo", "use": "Hutan", "risk": "Tinggi", "soil": "Andosol", "luas": 16.5, "kem": 41.0, "elev": 1550, "latitude": -3.1200, "longitude": 119.5500},
+  {"id": "TRJ-019", "kec": "Masanda", "desa": "Paku", "use": "Kebun Kopi", "risk": "Tinggi", "soil": "Podsolik", "luas": 8.7, "kem": 30.1, "elev": 1300, "latitude": -3.0500, "longitude": 119.5800},
+  {"id": "TRJ-020", "kec": "Kurra", "desa": "Rante Kurra", "use": "Sawah", "risk": "Sedang", "soil": "Aluvial", "luas": 4.8, "kem": 14.5, "elev": 880, "latitude": -3.0650, "longitude": 119.7200},
+  {"id": "TRJ-021", "kec": "Rantetayo", "desa": "Tapparan", "use": "Permukiman", "risk": "Rendah", "soil": "Latosol", "luas": 3.2, "kem": 8.0, "elev": 760, "latitude": -3.0500, "longitude": 119.8300},
+  {"id": "TRJ-022", "kec": "Malimbong Balepe", "desa": "Lemo Menduruk", "use": "Hutan", "risk": "Tinggi", "soil": "Podsolik", "luas": 11.9, "kem": 33.8, "elev": 1210, "latitude": -3.0900, "longitude": 119.7100},
+  {"id": "TRJ-023", "kec": "Makale", "desa": "Tondon Mamullu", "use": "Permukiman", "risk": "Sedang", "soil": "Regosol", "luas": 2.8, "kem": 17.0, "elev": 740, "latitude": -3.0900, "longitude": 119.8600},
+  {"id": "TRJ-024", "kec": "Bittuang", "desa": "Le'tek", "use": "Hutan", "risk": "Tinggi", "soil": "Andosol", "luas": 13.4, "kem": 37.2, "elev": 1480, "latitude": -3.0050, "longitude": 119.6700},
+  {"id": "TRJ-025", "kec": "Mengkendek", "desa": "Marinding", "use": "Sawah", "risk": "Rendah", "soil": "Aluvial", "luas": 7.1, "kem": 6.0, "elev": 790, "latitude": -3.1700, "longitude": 119.8800},
+  {"id": "TRJ-026", "kec": "Rembon", "desa": "Talion", "use": "Kebun Kopi", "risk": "Sedang", "soil": "Latosol", "luas": 6.3, "kem": 20.5, "elev": 940, "latitude": -3.1100, "longitude": 119.7500},
+  {"id": "TRJ-027", "kec": "Mappak", "desa": "Miallo", "use": "Hutan", "risk": "Tinggi", "soil": "Podsolik", "luas": 17.2, "kem": 43.5, "elev": 1600, "latitude": -3.2300, "longitude": 119.6100},
+  {"id": "TRJ-028", "kec": "Sangalla Utara", "desa": "Leatung", "use": "Kebun Kopi", "risk": "Sedang", "soil": "Latosol", "luas": 5.5, "kem": 15.8, "elev": 800, "latitude": -3.0850, "longitude": 119.9200},
+  {"id": "TRJ-029", "kec": "Bonggakaradeng", "desa": "Ratte Buttu", "use": "Lahan Kosong", "risk": "Tinggi", "soil": "Regosol", "luas": 10.8, "kem": 31.5, "elev": 920, "latitude": -3.1950, "longitude": 119.6450},
+  {"id": "TRJ-030", "kec": "Saluputi", "desa": "Rante", "use": "Sawah", "risk": "Rendah", "soil": "Aluvial", "luas": 6.0, "kem": 9.2, "elev": 810, "latitude": -3.0600, "longitude": 119.7800}
+];
+
+let data = source.map(d => ({...d}));
+let mapPoints = [];
+const fields = {kec: "Kecamatan", use: "Penggunaan Lahan", risk: "Tingkat Risiko", soil: "Jenis Tanah"};
+const sel = {kec: "", use: "", risk: "", soil: ""};
+const colors = ["#2563EB", "#D97706", "#DC2626", "#0D9488", "#8B5CF6", "#64748B"];
+const fmt = (v, n=1) => Number(v).toLocaleString("id-ID", {minimumFractionDigits: n, maximumFractionDigits: n});
+const slope = v => v < 8 ? "Datar" : v < 15 ? "Landai" : v < 25 ? "Agak Curam" : "Sangat Curam";
+const sum = (a, f) => a.reduce((s, d) => s + f(d), 0);
+
+function filtered() {
+  return data.filter(d => Object.keys(sel).every(k => !sel[k] || d[k] === sel[k]));
+}
+
+function init() {
+  let f = document.getElementById("filters");
+  f.innerHTML = Object.entries(fields).map(([k, v]) => 
+    `<label>${v}<select id="f_${k}"><option value="">Semua ${v}</option>${[...new Set(data.map(d => d[k]))].sort().map(v => `<option>${v}</option>`).join("")}</select></label>`
+  ).join("") + `<button class="primary" id="reset">Reset Filter</button>`;
+  
+  Object.keys(fields).forEach(k => {
+    document.getElementById("f_" + k).onchange = e => { sel[k] = e.target.value; draw(); };
+  });
+  document.getElementById("reset").onclick = () => {
+    Object.keys(sel).forEach(k => { sel[k] = ""; document.getElementById("f_" + k).value = ""; });
+    draw();
+  };
+}
+
+const charts = {};
+function chart(id, type, labels, values, horizontal=false) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id), {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+        borderColor: "#fff",
+        borderWidth: 1.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: horizontal ? "y" : "x",
+      plugins: { legend: { display: type === "doughnut", position: "right" } },
+      scales: type === "doughnut" ? {} : { x: { ticks: { autoSkip: false, maxRotation: 30 } }, y: { beginAtZero: true } }
+    }
+  });
+}
+
+function drawMap(a) {
+  const c = document.getElementById("map"), ctx = c.getContext("2d");
+  const rect = c.getBoundingClientRect(), w = Math.max(300, rect.width), h = 320, dpr = window.devicePixelRatio || 1;
+  c.width = w * dpr; c.height = h * dpr; ctx.scale(dpr, dpr);
+  ctx.fillStyle = "#F1F5F9"; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "#CBD5E1"; ctx.lineWidth = 0.5;
+  
+  for(let x=0; x<w; x+=40){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=0; y<h; y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  mapPoints = [];
+  const v = a.filter(d => d.latitude && d.longitude);
+  if (v.length) {
+    let xs = v.map(d => +d.longitude), ys = v.map(d => +d.latitude);
+    let minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys);
+    
+    v.forEach(d => {
+      let x = 40 + (+d.longitude - minx) / (maxx - minx || 1) * (w - 80);
+      let y = h - 40 - (+d.latitude - miny) / (maxy - miny || 1) * (h - 80);
+      mapPoints.push({x, y, r: 7, data: d});
+      
+      ctx.beginPath();
+      ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = d.risk === "Tinggi" ? "#DC2626" : d.risk === "Sedang" ? "#D97706" : "#0D9488";
+      ctx.fill();
+      ctx.strokeStyle = "#FFFFFF";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+    document.getElementById("mapStatus").textContent = `Menampilkan ${v.length} titik geospasial relatif Kabupaten Tana Toraja.`;
+  }
+}
+
+// Tooltip Canvas Map
+const mapCanvas = document.getElementById("map");
+const mapTooltip = document.getElementById("mapTooltip");
+
+mapCanvas.addEventListener("mousemove", e => {
+  const rect = mapCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  
+  let match = mapPoints.find(p => Math.hypot(p.x - mx, p.y - my) <= p.r + 3);
+  if (match) {
+    let d = match.data;
+    mapTooltip.style.display = "block";
+    mapTooltip.style.left = (mx + 15) + "px";
+    mapTooltip.style.top = (my - 15) + "px";
+    mapTooltip.innerHTML = `<b>${d.id} - ${d.desa}</b><br>Kec: ${d.kec}<br>Tutupan: ${d.use}<br>Risiko: <b>${d.risk}</b><br>Elevasi: ${d.elev} mdpl | Lereng: ${d.kem}%`;
+  } else {
+    mapTooltip.style.display = "none";
+  }
+});
+mapCanvas.addEventListener("mouseleave", () => { mapTooltip.style.display = "none"; });
+
+function draw() {
+  let a = filtered(), n = a.length, L = sum(a, d => +d.luas);
+  document.getElementById("kpis").innerHTML = [
+    ["Total Petak Lahan", n],
+    ["Total Luas Lahan", fmt(L) + " ha"],
+    ["Rata-rata Kemiringan", n ? fmt(sum(a, d => +d.kem) / n) + "%" : "—"],
+    ["Rata-rata Elevasi", n ? fmt(sum(a, d => +d.elev) / n, 0) + " mdpl" : "—"],
+    ["Petak Risiko Tinggi", a.filter(d => d.risk === "Tinggi").length]
+  ].map(([l, v]) => `<div class="card kpi"><div class="label">${l}</div><div class="value">${v}</div></div>`).join("");
+
+  const grp = (k, area) => {
+    let o = {}; a.forEach(d => o[d[k]] = (o[d[k]] || 0) + (area ? +d.luas : 1)); return o;
+  };
+
+  let u = grp("use", true), r = grp("risk", true), k = grp("kec", true);
+  let s = {"Datar": 0, "Landai": 0, "Agak Curam": 0, "Sangat Curam": 0};
+  a.forEach(d => s[slope(+d.kem)]++);
+
+  chart("c1", "bar", Object.keys(u), Object.values(u));
+  chart("c2", "doughnut", Object.keys(r), Object.values(r));
+  chart("c3", "bar", Object.keys(k), Object.values(k), true);
+  chart("c4", "bar", Object.keys(s), Object.values(s));
+  
+  drawMap(a);
+  document.getElementById("count").textContent = `(${n} Petak Lahan)`;
+
+  let cols = [["id","ID"],["kec","Kecamatan"],["desa","Desa/Lembang"],["use","Tutupan Lahan"],["risk","Tingkat Risiko"],["luas","Luas (ha)"],["kem","Lereng (%)"],["elev","Elevasi (m)"],["latitude","Lat"],["longitude","Lon"]];
+  let t = document.getElementById("table");
+  
+  t.innerHTML = "<tr>" + cols.map(c => `<th>${c[1]}</th>`).join("") + "</tr>" +
+    a.map(d => "<tr>" + cols.map(([k]) => {
+      if(k === "risk") {
+        let cls = d[k] === "Tinggi" ? "badge-tinggi" : d[k] === "Sedang" ? "badge-sedang" : "badge-rendah";
+        return `<td><span class="badge ${cls}">${d[k]}</span></td>`;
+      }
+      return `<td>${d[k] ?? ""}</td>`;
+    }).join("") + "</tr>").join("");
+}
+
+function parseCSV(txt) {
+  let lines = txt.replace(/^\uFEFF/,"").trim().split(/\r?\n/);
+  return lines.slice(1).map((line, i) => {
+    let r = line.split(",");
+    return {
+      id: r[0] || "CSV-" + (i+1), kec: r[1]||"", desa: r[2]||"", use: r[3]||"Belum diisi",
+      risk: r[4]||"Sedang", soil: r[5]||"", luas: Number(r[6])||0, kem: Number(r[7])||0,
+      elev: Number(r[8])||0, latitude: Number(r[9])||0, longitude: Number(r[10])||0
+    };
+  });
+}
+
+document.getElementById("csv").onchange = e => {
+  let file = e.target.files[0]; if (!file) return;
+  let r = new FileReader();
+  r.onload = () => {
+    try {
+      data = parseCSV(r.result);
+      Object.keys(sel).forEach(k => sel[k] = "");
+      init(); draw();
+      alert("Data CSV berhasil dimuat!");
+    } catch(err) { alert("Format CSV tidak sesuai."); }
+  };
+  r.readAsText(file);
+};
+
+document.getElementById("download").onclick = () => {
+  let cols = [["id","ID"],["kec","Kecamatan"],["desa","Desa"],["use","Penggunaan Lahan"],["risk","Tingkat Risiko"],["soil","Jenis Tanah"],["luas","Luas (ha)"],["kem","Kemiringan (%)"],["elev","Elevasi (m)"],["latitude","Latitude"],["longitude","Longitude"]];
+  let csv = [cols.map(c=>c[1]).join(","), ...data.map(d => cols.map(([k]) => '"' + String(d[k]??"").replace(/"/g,'""') + '"').join(","))].join("\r\n");
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], {type: "text/csv;charset=utf-8"}));
+  a.download = "data_mitigasi_longsor_tana_toraja_risil.csv";
+  a.click();
+};
+
+init(); draw();
+window.addEventListener("resize", () => drawMap(filtered()));
+</script>
+</body>
+</html>
